@@ -222,14 +222,19 @@ class GameController extends ChangeNotifier {
       players[currentRevealIndex].hasSeenWord = true;
     }
     isCardRevealed = false;
-
-    if (currentRevealIndex + 1 < players.length) {
-      currentRevealIndex++;
-    } else {
-      // All players have seen their word! Move to discussion
-      phase = GamePhase.discussion;
-    }
     notifyListeners();
+
+    // Delay advancing index until card flips back face-down (~320ms)
+    // so the next player's word is never revealed during rotation.
+    Future.delayed(const Duration(milliseconds: 320), () {
+      if (currentRevealIndex + 1 < players.length) {
+        currentRevealIndex++;
+      } else {
+        // All players have seen their word! Move to discussion
+        phase = GamePhase.discussion;
+      }
+      notifyListeners();
+    });
   }
 
   void proceedToVoting() {
@@ -301,7 +306,7 @@ class GameController extends ChangeNotifier {
       int pts = 0;
       if (team == WinningTeam.civilians) {
         if (p.role == Role.civilian) {
-          pts = 2; // Civilians get 2 points each
+          pts = 4; // Civilians get 4 points each
         }
       } else if (team == WinningTeam.infiltrators) {
         if (p.role == Role.undercover && p.isAlive) {

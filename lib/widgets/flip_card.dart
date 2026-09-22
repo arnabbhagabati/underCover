@@ -25,11 +25,11 @@ class _FlipCardState extends State<FlipCard> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
     if (widget.isFlipped) {
