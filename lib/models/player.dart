@@ -7,6 +7,8 @@ class Player {
   final String word;
   bool isAlive;
   bool hasSeenWord;
+  int score;
+  int roundPointsEarned;
 
   Player({
     required this.id,
@@ -15,6 +17,8 @@ class Player {
     required this.word,
     this.isAlive = true,
     this.hasSeenWord = false,
+    this.score = 0,
+    this.roundPointsEarned = 0,
   });
 
   Player copyWith({
@@ -24,6 +28,8 @@ class Player {
     String? word,
     bool? isAlive,
     bool? hasSeenWord,
+    int? score,
+    int? roundPointsEarned,
   }) {
     return Player(
       id: id ?? this.id,
@@ -32,6 +38,8 @@ class Player {
       word: word ?? this.word,
       isAlive: isAlive ?? this.isAlive,
       hasSeenWord: hasSeenWord ?? this.hasSeenWord,
+      score: score ?? this.score,
+      roundPointsEarned: roundPointsEarned ?? this.roundPointsEarned,
     );
   }
 }

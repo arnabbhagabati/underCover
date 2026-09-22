@@ -16,8 +16,8 @@ enum GamePhase {
 
 enum WinningTeam {
   civilians,
-  undercovers,
-  mrWhite,
+  infiltrators,
+  mrWhiteGuess,
 }
 
 class GameController extends ChangeNotifier {
@@ -33,6 +33,8 @@ class GameController extends ChangeNotifier {
     'Player 4',
     'Player 5',
   ];
+
+  Map<String, int> cumulativeScores = {}; // Preserves player scores across rounds
 
   String selectedCategory = 'All Categories';
   String customCivilianWord = '';
@@ -171,8 +173,9 @@ class GameController extends ChangeNotifier {
     }
     rolesDeck.shuffle(_random);
 
-    // Build Players
+    // Build Players with cumulative scores preserved
     players = List.generate(totalPlayers, (index) {
+      final name = playerNames[index].trim();
       final role = rolesDeck[index];
       String word;
       if (role == Role.civilian) {
@@ -183,11 +186,15 @@ class GameController extends ChangeNotifier {
         word = '?';
       }
 
+      final existingScore = cumulativeScores[name] ?? 0;
+
       return Player(
         id: index + 1,
-        name: playerNames[index].trim(),
+        name: name,
         role: role,
         word: word,
+        score: existingScore,
+        roundPointsEarned: 0,
       );
     });
 
@@ -251,11 +258,12 @@ class GameController extends ChangeNotifier {
     final targetWord = activeCivilianWord.trim().toLowerCase();
 
     if (mrWhiteLastGuess.toLowerCase() == targetWord) {
-      // Mr. White guessed correctly and steals the win!
+      // Mr. White guessed correctly and steals the win! (6 points for Mr. White)
       mrWhiteGuessCorrect = true;
-      winningTeam = WinningTeam.mrWhite;
+      winningTeam = WinningTeam.mrWhiteGuess;
       victoryMessage =
-          'Mr. White (${currentEliminatedPlayer?.name}) guessed "$activeCivilianWord" correctly and steals the WIN!';
+          'Mr. White (${currentEliminatedPlayer?.name}) guessed "$activeCivilianWord" correctly! (+6 pts)';
+      _awardPoints(WinningTeam.mrWhiteGuess, winningMrWhite: currentEliminatedPlayer);
       phase = GamePhase.gameOver;
     } else {
       mrWhiteGuessCorrect = false;
@@ -267,25 +275,49 @@ class GameController extends ChangeNotifier {
 
   void _evaluateGameWinner() {
     if (aliveSpiesCount == 0) {
-      // Civilians eliminated all undercovers & Mr. White
+      // Civilians win if they eliminate all Undercovers and Mr. Whites! (+2 pts each)
       winningTeam = WinningTeam.civilians;
-      victoryMessage = 'Civilians successfully eliminated all Undercovers and Mr. White!';
+      victoryMessage =
+          'Civilians successfully eliminated all Undercovers and Mr. White! (+2 pts each)';
+      _awardPoints(WinningTeam.civilians);
       phase = GamePhase.gameOver;
-    } else if (aliveSpiesCount >= aliveCiviliansCount) {
-      // Undercovers / Mr. White survived and equal/outnumber Civilians!
-      if (aliveUndercoverCount > 0) {
-        winningTeam = WinningTeam.undercovers;
-        victoryMessage =
-            'Undercovers survived and outnumber/equal remaining Civilians!';
-      } else {
-        winningTeam = WinningTeam.mrWhite;
-        victoryMessage =
-            'Mr. White survived and outnumbers/equals remaining Civilians!';
-      }
+    } else if (aliveCiviliansCount <= 1 && aliveSpiesCount >= 1) {
+      // Infiltrators win if they survive until only 1 Civilian is left!
+      winningTeam = WinningTeam.infiltrators;
+      victoryMessage =
+          'Infiltrators survived until only 1 Civilian remained! (Undercover: +10 pts, Mr. White: +6 pts)';
+      _awardPoints(WinningTeam.infiltrators);
       phase = GamePhase.gameOver;
     } else {
       // Game continues!
       phase = GamePhase.voting;
+    }
+  }
+
+  // --- Points Scoring Logic ---
+
+  void _awardPoints(WinningTeam team, {Player? winningMrWhite}) {
+    for (var p in players) {
+      int pts = 0;
+      if (team == WinningTeam.civilians) {
+        if (p.role == Role.civilian) {
+          pts = 2; // Civilians get 2 points each
+        }
+      } else if (team == WinningTeam.infiltrators) {
+        if (p.role == Role.undercover && p.isAlive) {
+          pts = 10; // Undercover gets 10 points on victory
+        } else if (p.role == Role.mrWhite && p.isAlive) {
+          pts = 6; // Mr. White gets 6 points on victory
+        }
+      } else if (team == WinningTeam.mrWhiteGuess) {
+        if (p.id == winningMrWhite?.id) {
+          pts = 12; // Mr. White gets 12 points on correct guess
+        }
+      }
+
+      p.roundPointsEarned = pts;
+      p.score += pts;
+      cumulativeScores[p.name] = p.score;
     }
   }
 
@@ -301,6 +333,7 @@ class GameController extends ChangeNotifier {
     currentWordPair = null;
     activeCivilianWord = '';
     activeUndercoverWord = '';
+    cumulativeScores.clear();
     notifyListeners();
   }
 }

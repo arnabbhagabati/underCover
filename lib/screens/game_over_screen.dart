@@ -23,15 +23,19 @@ class GameOverScreen extends StatelessWidget {
       teamColor = Role.civilian.color;
       titleText = 'CIVILIANS WIN!';
       victoryIcon = Icons.groups_rounded;
-    } else if (winningTeam == WinningTeam.undercovers) {
+    } else if (winningTeam == WinningTeam.infiltrators) {
       teamColor = Role.undercover.color;
-      titleText = 'UNDERCOVER WINS!';
+      titleText = 'INFILTRATORS WIN!';
       victoryIcon = Icons.security_rounded;
-    } else if (winningTeam == WinningTeam.mrWhite) {
+    } else if (winningTeam == WinningTeam.mrWhiteGuess) {
       teamColor = Role.mrWhite.color;
       titleText = 'MR. WHITE WINS!';
       victoryIcon = Icons.help_outline_rounded;
     }
+
+    // Sort players for leaderboard by cumulative total score
+    final leaderboard = List.of(controller.players)
+      ..sort((a, b) => b.score.compareTo(a.score));
 
     return Scaffold(
       body: ConfettiWidget(
@@ -45,7 +49,7 @@ class GameOverScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                     child: Column(
                       children: [
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
@@ -55,11 +59,11 @@ class GameOverScreen extends StatelessWidget {
                           ),
                           child: Icon(
                             victoryIcon,
-                            size: 64,
+                            size: 60,
                             color: teamColor,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         Text(
                           titleText,
                           textAlign: TextAlign.center,
@@ -70,22 +74,24 @@ class GameOverScreen extends StatelessWidget {
                             letterSpacing: 1.5,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             controller.victoryMessage,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               color: Colors.white70,
                               height: 1.4,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 30),
-                        _buildWordPairCard(controller),
                         const SizedBox(height: 24),
+                        _buildWordPairCard(controller),
+                        const SizedBox(height: 20),
+                        _buildLeaderboardCard(leaderboard),
+                        const SizedBox(height: 20),
                         _buildPlayerSummaryList(controller),
                         const SizedBox(height: 20),
                       ],
@@ -129,7 +135,7 @@ class GameOverScreen extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  const Text('Civilians', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  const Text('Civilians Word', style: TextStyle(color: Colors.white54, fontSize: 12)),
                   const SizedBox(height: 4),
                   Text(
                     controller.activeCivilianWord,
@@ -144,7 +150,7 @@ class GameOverScreen extends StatelessWidget {
               Container(height: 30, width: 1, color: Colors.white10),
               Column(
                 children: [
-                  const Text('Undercover', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  const Text('Undercover Word', style: TextStyle(color: Colors.white54, fontSize: 12)),
                   const SizedBox(height: 4),
                   Text(
                     controller.activeUndercoverWord,
@@ -159,6 +165,101 @@ class GameOverScreen extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLeaderboardCard(List players) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Text(
+                  'Leaderboard & Points',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Icon(Icons.leaderboard_rounded, color: Colors.amber, size: 22),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: players.length,
+              separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 12),
+              itemBuilder: (context, index) {
+                final player = players[index];
+                final roundPts = player.roundPointsEarned;
+
+                return Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: index == 0
+                          ? Colors.amber.withOpacity(0.2)
+                          : const Color(0xFF334155),
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: index == 0 ? Colors.amber : Colors.white70,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        player.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    if (roundPts > 0) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.green.withOpacity(0.4)),
+                        ),
+                        child: Text(
+                          '+$roundPts pts',
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Text(
+                      '${player.score} pts',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: UndercoverTheme.skyBlue,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -198,7 +299,7 @@ class GameOverScreen extends StatelessWidget {
                       child: Text(
                         player.name,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: player.isAlive ? Colors.white : Colors.white54,
                           decoration: player.isAlive ? null : TextDecoration.lineThrough,
@@ -233,7 +334,7 @@ class GameOverScreen extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: CustomButton(
-              text: 'Play Again (Same Players)',
+              text: 'Play Next Round (Same Scores)',
               icon: Icons.replay_rounded,
               onPressed: () => controller.playAgainSameSettings(),
             ),
@@ -243,7 +344,7 @@ class GameOverScreen extends StatelessWidget {
             width: double.infinity,
             height: 50,
             child: CustomButton(
-              text: 'Change Settings / New Game',
+              text: 'Reset & New Game',
               icon: Icons.settings_rounded,
               isSecondary: true,
               onPressed: () => controller.resetToSetup(),

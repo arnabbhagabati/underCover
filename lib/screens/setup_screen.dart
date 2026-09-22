@@ -254,7 +254,7 @@ class _SetupScreenState extends State<SetupScreen> {
     return Row(
       children: [
         SizedBox(
-          width: 120,
+          width: 92,
           child: RoleBadge(role: role),
         ),
         const SizedBox(width: 12),
