@@ -163,7 +163,7 @@ class WordRevealScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            'Secret Role Card',
+            'Secret Word Card',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -200,6 +200,9 @@ class WordRevealScreen extends StatelessWidget {
     final role = currentPlayer.role as Role;
     final isMrWhite = role == Role.mrWhite;
 
+    final themeColor = isMrWhite ? Role.mrWhite.color : UndercoverTheme.vibrantBlue;
+    final accentColor = isMrWhite ? Role.mrWhite.color : UndercoverTheme.skyBlue;
+
     return Container(
       width: double.infinity,
       height: 320,
@@ -207,10 +210,10 @@ class WordRevealScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: role.color.withOpacity(0.8), width: 2.5),
+        border: Border.all(color: themeColor.withOpacity(0.8), width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: role.color.withOpacity(0.3),
+            color: themeColor.withOpacity(0.3),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -219,10 +222,36 @@ class WordRevealScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          RoleBadge(role: role),
+          if (isMrWhite)
+            const RoleBadge(role: Role.mrWhite)
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: UndercoverTheme.vibrantBlue.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: UndercoverTheme.skyBlue.withOpacity(0.4)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.lock_rounded, size: 16, color: UndercoverTheme.skyBlue),
+                  SizedBox(width: 6),
+                  Text(
+                    'SECRET WORD',
+                    style: TextStyle(
+                      color: UndercoverTheme.skyBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 20),
           Text(
-            'YOUR SECRET WORD IS',
+            isMrWhite ? 'YOUR STATUS' : 'YOUR SECRET WORD IS',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -232,9 +261,9 @@ class WordRevealScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
-              color: role.color.withOpacity(0.15),
+              color: themeColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
@@ -242,14 +271,16 @@ class WordRevealScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: isMrWhite ? 48 : 32,
                 fontWeight: FontWeight.w900,
-                color: role.color,
+                color: accentColor,
                 letterSpacing: 1,
               ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            role.description,
+            isMrWhite
+                ? 'You have NO word! Listen carefully during descriptions and bluff your way through.'
+                : 'Keep your word secret! Give a 1-sentence hint during discussion to figure out if you share the majority word or not.',
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 13,

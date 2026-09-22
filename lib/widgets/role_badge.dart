@@ -20,23 +20,27 @@ class RoleBadge extends StatelessWidget {
     final name = role.displayName;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.18),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.5), width: 1),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 6),
-          Text(
-            name,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
+          Flexible(
+            child: Text(
+              name,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
             ),
           ),
           if (showWord && word != null) ...[
@@ -47,12 +51,15 @@ class RoleBadge extends StatelessWidget {
               color: color.withOpacity(0.4),
             ),
             const SizedBox(width: 6),
-            Text(
-              '("$word")',
-              style: TextStyle(
-                color: color.withOpacity(0.9),
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+            Flexible(
+              child: Text(
+                '("$word")',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: color.withOpacity(0.9),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
