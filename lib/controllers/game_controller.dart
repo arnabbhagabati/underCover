@@ -42,6 +42,9 @@ class GameController extends ChangeNotifier {
   GamePhase phase = GamePhase.setup;
   List<Player> players = [];
   WordPair? currentWordPair;
+  String activeCivilianWord = '';
+  String activeUndercoverWord = '';
+
   int currentRevealIndex = 0;
   bool isCardRevealed = false;
 
@@ -146,6 +149,15 @@ class GameController extends ChangeNotifier {
       currentWordPair = availablePairs[_random.nextInt(availablePairs.length)];
     }
 
+    // Interchangeably assign civilian and undercover words for 50% random swap
+    final bool swapWords = _random.nextBool();
+    activeCivilianWord = swapWords
+        ? currentWordPair!.undercoverWord
+        : currentWordPair!.civilianWord;
+    activeUndercoverWord = swapWords
+        ? currentWordPair!.civilianWord
+        : currentWordPair!.undercoverWord;
+
     // Build Roles Deck
     List<Role> rolesDeck = [];
     for (int i = 0; i < civiliansCount; i++) {
@@ -164,9 +176,9 @@ class GameController extends ChangeNotifier {
       final role = rolesDeck[index];
       String word;
       if (role == Role.civilian) {
-        word = currentWordPair!.civilianWord;
+        word = activeCivilianWord;
       } else if (role == Role.undercover) {
-        word = currentWordPair!.undercoverWord;
+        word = activeUndercoverWord;
       } else {
         word = '?';
       }
@@ -236,14 +248,14 @@ class GameController extends ChangeNotifier {
 
   void submitMrWhiteGuess(String guess) {
     mrWhiteLastGuess = guess.trim();
-    final targetWord = currentWordPair?.civilianWord.trim().toLowerCase() ?? '';
+    final targetWord = activeCivilianWord.trim().toLowerCase();
 
     if (mrWhiteLastGuess.toLowerCase() == targetWord) {
       // Mr. White guessed correctly and steals the win!
       mrWhiteGuessCorrect = true;
       winningTeam = WinningTeam.mrWhite;
       victoryMessage =
-          'Mr. White (${currentEliminatedPlayer?.name}) guessed "$targetWord" correctly and steals the WIN!';
+          'Mr. White (${currentEliminatedPlayer?.name}) guessed "$activeCivilianWord" correctly and steals the WIN!';
       phase = GamePhase.gameOver;
     } else {
       mrWhiteGuessCorrect = false;
@@ -287,6 +299,8 @@ class GameController extends ChangeNotifier {
     phase = GamePhase.setup;
     players = [];
     currentWordPair = null;
+    activeCivilianWord = '';
+    activeUndercoverWord = '';
     notifyListeners();
   }
 }

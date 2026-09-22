@@ -132,7 +132,7 @@ class GameOverScreen extends StatelessWidget {
                   const Text('Civilians', style: TextStyle(color: Colors.white54, fontSize: 12)),
                   const SizedBox(height: 4),
                   Text(
-                    pair.civilianWord,
+                    controller.activeCivilianWord,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -147,7 +147,7 @@ class GameOverScreen extends StatelessWidget {
                   const Text('Undercover', style: TextStyle(color: Colors.white54, fontSize: 12)),
                   const SizedBox(height: 4),
                   Text(
-                    pair.undercoverWord,
+                    controller.activeUndercoverWord,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

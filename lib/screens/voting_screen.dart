@@ -429,7 +429,7 @@ class _VotingScreenState extends State<VotingScreen> {
               Text(
                 isCorrect
                     ? 'Mr. White guessed "${controller.mrWhiteLastGuess}" and STEALS THE WIN!'
-                    : 'Mr. White guessed "${controller.mrWhiteLastGuess}", but the Civilian word was "${controller.currentWordPair?.civilianWord}".',
+                    : 'Mr. White guessed "${controller.mrWhiteLastGuess}", but the Civilian word was "${controller.activeCivilianWord}".',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
